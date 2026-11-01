@@ -1,0 +1,38 @@
+{
+  "name": "Carnet PEV",
+  "short_name": "Carnet PEV",
+  "description": "Calendrier de vaccination du PEV en Côte d’Ivoire : rendez-vous des enfants et des femmes enceintes, vaccins du prochain contact, rappels WhatsApp.",
+  "lang": "fr",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F6FC",
+  "theme_color": "#FFB02E",
+  "categories": [
+    "health",
+    "medical"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
