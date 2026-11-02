@@ -1,7 +1,7 @@
 /* Carnet PEV : service worker.
    Garde l'application en mémoire pour qu'elle s'ouvre sans connexion.
    Les fiches ne passent jamais par ici : elles restent dans le navigateur du téléphone. */
-const VERSION = 'ff7c5f3432';
+const VERSION = '0296d2f455';
 const CACHE = 'carnet-pev-' + VERSION;
 const COEUR = ["index.html","manifest.webmanifest","favicon.svg","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png"];
 const ACCUEIL = new URL('index.html', self.location).href;
