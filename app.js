@@ -1,4 +1,5 @@
-/* Carnet PEV : calendriers, registre et espace parent. */
+/* Carnet PEV : calendriers, registre et espace parent.
+   © 2026 AKE Ange Eloi a.k.a Joker. Tous droits réservés. */
 /* ==== MOTEUR : calendriers PEV (nourrisson) et Td (femme enceinte) ==== */
 var MS_JOUR = 86400000;
 function parseISO(s) { var p = String(s).split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); }

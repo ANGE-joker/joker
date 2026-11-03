@@ -40,3 +40,9 @@ Remplacer les fichiers dans le dépôt (Add file, puis Upload files). GitHub Pag
 ## Avertissement
 
 Les dates sont calculées d'après les calendriers PEV et Td. Le carnet de santé et l'agent de santé font foi.
+
+## Droits d'auteur
+
+© 2026 AKE Ange Eloi a.k.a Joker. Tous droits réservés.
+
+Voir le fichier `LICENSE`. L'application s'utilise librement depuis son site ; la copier, la modifier ou la redistribuer demande l'accord écrit de l'auteur.

@@ -1,4 +1,4 @@
-/* Carnet PEV : démarrage.
+/* Carnet PEV : démarrage. © 2026 AKE Ange Eloi a.k.a Joker. Tous droits réservés.
    1. Le site ne s'affiche que s'il est ouvert directement, jamais dans une iframe d'un autre site (détournement de clic).
    2. Le service worker garde l'application en mémoire pour l'ouvrir sans connexion. */
 (function () {

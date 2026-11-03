@@ -1,7 +1,7 @@
-/* Carnet PEV : service worker.
+/* Carnet PEV : service worker. © 2026 AKE Ange Eloi a.k.a Joker. Tous droits réservés.
    Garde l'application en mémoire pour qu'elle s'ouvre sans connexion.
    Les fiches ne passent jamais par ici : elles restent dans le navigateur du téléphone. */
-const VERSION = '8e405c315d';
+const VERSION = 'b71bfd27f7';
 const CACHE = 'carnet-pev-' + VERSION;
 const COEUR = ["index.html","style.css","app.js","boot.js","manifest.webmanifest","favicon.svg","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png"];
 const ACCUEIL = new URL('index.html', self.location).href;
