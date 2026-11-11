@@ -119,6 +119,63 @@ function ageTexte(naissance, auj) {
   if (mois < 24) return mois + ' mois';
   return Math.floor(mois / 12) + ' ans';
 }
+/* ---- Rappels pour le calendrier du téléphone (fichier .ics) ---- */
+function icsTexte(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+/* Les lignes d'un fichier .ics ne dépassent pas 75 octets : la suite commence par une espace. */
+function icsPlier(ligne) {
+  var out = [], cur = '', n = 0;
+  Array.from(ligne).forEach(function (c) {
+    var p = c.codePointAt(0), o = p < 0x80 ? 1 : p < 0x800 ? 2 : p < 0x10000 ? 3 : 4;
+    if (n + o > 75) { out.push(cur); cur = ' '; n = 1; }
+    cur += c; n += o;
+  });
+  out.push(cur);
+  return out;
+}
+/* Un rendez-vous par vaccin à venir, à 8 h (heure indicative). Alertes : la veille à 8 h et le jour même à 7 h.
+   Le rendez-vous le plus proche, s'il est en retard, devient un rappel pour le lendemain. */
+function fabriquerICS(rec, items, auj, maintenant) {
+  var stamp = new Date(maintenant).toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  var seq = Math.floor(maintenant / 60000);
+  var prochain = prochainDe(items), lignes = [], n = 0;
+  lignes.push('BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AKE Ange Eloi a.k.a Joker//Carnet PEV//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH');
+  items.forEach(function (it) {
+    if (it.fait) return;
+    var jour = it.date, retard = false;
+    if (jour < auj) {
+      if (it !== prochain) return;
+      jour = ajouterJours(auj, 1); retard = true;
+    }
+    var j = toISO(jour).replace(/-/g, '');
+    var titre = rec.type === 'enfant'
+      ? 'Vaccination de ' + rec.nom + ' : ' + it.label
+      : 'Vaccin ' + it.label + ' : ' + rec.nom;
+    if (retard) titre = 'En retard : ' + titre;
+    var desc = 'Vaccins prévus : ' + it.v.join(', ') + '.\n' +
+      (retard ? 'Le rendez-vous prévu n’a pas encore eu lieu : passez au centre de santé dès que possible.\n' : '') +
+      'Pensez à apporter le carnet de santé.\n' +
+      'Date et heure indicatives (calendrier PEV de Côte d’Ivoire) : confirmez-les avec l’agent de santé.\n' +
+      'Carnet PEV';
+    lignes.push('BEGIN:VEVENT',
+      'UID:' + rec.id + '-' + it.k + '@carnet-pev',
+      'DTSTAMP:' + stamp,
+      'SEQUENCE:' + seq,
+      'SUMMARY:' + icsTexte(titre),
+      'DTSTART:' + j + 'T080000',
+      'DTEND:' + j + 'T090000',
+      'DESCRIPTION:' + icsTexte(desc),
+      'TRANSP:TRANSPARENT');
+    if (jour >= ajouterJours(auj, 2)) lignes.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexte(titre), 'TRIGGER:-P1D', 'END:VALARM');
+    if (jour > auj) lignes.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexte(titre), 'TRIGGER:-PT1H', 'END:VALARM');
+    lignes.push('END:VEVENT');
+    n++;
+  });
+  lignes.push('END:VCALENDAR');
+  var texte = lignes.reduce(function (acc, l) { return acc.concat(icsPlier(l)); }, []).join('\r\n') + '\r\n';
+  return { texte: texte, n: n };
+}
 /* ==== FIN MOTEUR ==== */
 
 (function () {
@@ -575,6 +632,13 @@ function ageTexte(naissance, auj) {
         '<details class="msg" id="det-msg"><summary>Voir le message de rappel</summary><textarea id="msg-txt" readonly rows="5">' + esc(msg) + '</textarea></details>' +
         '<button type="button" class="btn bloc" data-act="copier" id="btn-copier">Copier le message</button>' +
         '</div></section>';
+      if (role === 'parent') {
+        h += '<section class="rappel-cal" aria-label="Alertes sur ce téléphone"><h2>' + ICON_CLOCHE + 'Être alerté sur ce téléphone</h2>' +
+          '<p>Ajoutez tous les rendez-vous à venir au calendrier du téléphone. Vous recevrez une alerte la veille à 8 h et le jour même à 7 h, même sans internet.</p>' +
+          '<button type="button" class="btn primary bloc" data-act="calendrier">Ajouter les rappels au calendrier</button>' +
+          '<p class="muted petit" id="cal-info" role="status" aria-live="polite"></p>' +
+          '<p class="muted petit">Les rappels portent le nom inscrit sur la fiche et restent dans le calendrier de ce téléphone. Si votre calendrier est synchronisé avec Google ou iCloud, ils y seront aussi.</p></section>';
+      }
     } else {
       h += '<section class="prochain" data-etat="complet"><p class="eyebrow">Calendrier</p><h2>Tous les vaccins du calendrier sont faits.</h2>' +
         '<p class="sous">Vérifiez toujours le carnet de santé avec l’agent de santé.</p></section>';
@@ -695,6 +759,19 @@ function ageTexte(naissance, auj) {
       var fin = function () { b.textContent = 'Message copié'; setTimeout(function () { if (b.isConnected) b.textContent = 'Copier le message'; }, 2000); };
       var secours = function () { var det = document.getElementById('det-msg'); if (det) det.open = true; txt.focus(); txt.select(); b.textContent = 'Appuyez longuement pour copier'; };
       try { navigator.clipboard.writeText(txt.value).then(fin, secours); } catch (e) { secours(); }
+    }
+    else if (a === 'calendrier') {
+      rec = recCourante(); if (!rec) return;
+      var info = document.getElementById('cal-info'), ics = fabriquerICS(rec, planifier(rec), aujourdhui(), Date.now());
+      if (!ics.n) { if (info) info.textContent = 'Aucun vaccin à venir : rien à ajouter.'; return; }
+      try {
+        var url = URL.createObjectURL(new Blob([ics.texte], { type: 'text/calendar;charset=utf-8' }));
+        var lien = document.createElement('a');
+        lien.href = url; lien.download = 'rappels-carnet-pev.ics';
+        document.body.appendChild(lien); lien.click(); lien.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+        if (info) info.textContent = ics.n + ' rappel' + (ics.n > 1 ? 's' : '') + ' prêt' + (ics.n > 1 ? 's' : '') + '. Ouvrez le fichier téléchargé puis choisissez « Ajouter au calendrier ». Si rien ne s’ouvre, ouvrez le site dans Safari ou Chrome (pas depuis l’icône) et réessayez.';
+      } catch (e) { if (info) info.textContent = 'Impossible de créer le fichier sur ce téléphone.'; }
     }
     else if (a === 'suppr') { S.confirmSuppr = true; render(false); }
     else if (a === 'suppr-non') { S.confirmSuppr = false; render(false); }

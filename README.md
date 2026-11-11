@@ -3,7 +3,7 @@
 Calendrier de vaccination du Programme élargi de vaccination (PEV) de Côte d'Ivoire, pensé pour le téléphone.
 
 - **Agent de santé** : registre des enfants et des femmes enceintes, prochain rendez-vous, vaccins du contact, rappel WhatsApp au parent.
-- **Espace parent** : le parent ajoute son enfant et voit les prochains rendez-vous.
+- **Espace parent** : le parent ajoute son enfant, voit les prochains rendez-vous et les ajoute au calendrier de son téléphone (alerte la veille à 8 h et le jour même à 7 h, sans internet).
 - **Calendriers** : PEV du nourrisson (naissance, 6, 10, 14 semaines, 6, 8, 9 et 15 mois, HPV à 9 ans pour les filles) et Td de la femme enceinte (Td 1 à Td 5).
 - **Hors connexion** : après une première ouverture en ligne, l'application s'ouvre sans internet.
 
